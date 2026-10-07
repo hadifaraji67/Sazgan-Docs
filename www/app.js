@@ -276,12 +276,34 @@ async function reader(id, params) {
 function mdRender(text) {
   const inl = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
   const lines = text.split('\n');
-  let html = '', inList = false, inTable = false;
+  let html = '', inList = false, inTable = false, inCode = false, codeBuf = [];
+  const closeBlocks = () => {
+    if (inList) { html += '</ul>'; inList = false; }
+    if (inTable) { html += '</table>'; inTable = false; }
+  };
   for (const line of lines) {
-    if (/^### /.test(line)) { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<h3>${inl(line.slice(4))}</h3>`; }
-    else if (/^## /.test(line)) { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<h2>${inl(line.slice(3))}</h2>`; }
-    else if (/^# /.test(line)) { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<h1>${inl(line.slice(2))}</h1>`; }
-    else if (/^- /.test(line)) { if (inTable) { html += '</table>'; inTable = false; } if (!inList) { html += '<ul>'; inList = true; } html += `<li>${inl(line.slice(2))}</li>`; }
+    if (/^```/.test(line)) {
+      if (inCode) { html += '<pre><code>' + esc(codeBuf.join('\n')) + '</code></pre>'; codeBuf = []; inCode = false; }
+      else { closeBlocks(); inCode = true; }
+      continue;
+    }
+    if (inCode) { codeBuf.push(line); continue; }
+    const imgM = line.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+    if (imgM) {
+      closeBlocks();
+      html += `<figure class="art-fig"><img src="learn-images/${esc(imgM[2])}" alt="${inl(imgM[1])}" loading="lazy"><figcaption>${inl(imgM[1])}</figcaption></figure>`;
+      continue;
+    }
+    if (/^### /.test(line)) { closeBlocks(); html += `<h3>${inl(line.slice(4))}</h3>`; }
+    else if (/^## /.test(line)) { closeBlocks(); html += `<h2>${inl(line.slice(3))}</h2>`; }
+    else if (/^# /.test(line)) { closeBlocks(); html += `<h1>${inl(line.slice(2))}</h1>`; }
+    else if (/^> /.test(line)) { closeBlocks(); html += `<blockquote>${inl(line.slice(2))}</blockquote>`; }
+    else if (/^---+\s*$/.test(line)) { closeBlocks(); html += '<hr>'; }
+    else if (/^- /.test(line)) {
+      if (inTable) { html += '</table>'; inTable = false; }
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${inl(line.slice(2))}</li>`;
+    }
     else if (/^\|/.test(line)) {
       const cells = line.split('|').slice(1, -1).map(c => c.trim());
       if (/^[\s|:-]+$/.test(line)) continue;
@@ -289,11 +311,11 @@ function mdRender(text) {
       if (!inTable) { html += '<table>'; inTable = true; html += '<thead><tr>' + cells.map(c => `<th>${inl(c)}</th>`).join('') + '</tr></thead><tbody>'; continue; }
       html += '<tr>' + cells.map(c => `<td>${inl(c)}</td>`).join('') + '</tr>';
     }
-    else if (line.trim() === '') { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } }
-    else { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<p>${inl(line)}</p>`; }
+    else if (line.trim() === '') { closeBlocks(); }
+    else { closeBlocks(); html += `<p>${inl(line)}</p>`; }
   }
-  if (inList) html += '</ul>';
-  if (inTable) html += '</table>';
+  if (inCode) html += '<pre><code>' + esc(codeBuf.join('\n')) + '</code></pre>';
+  closeBlocks();
   return html;
 }
 function learnList() {
@@ -317,6 +339,7 @@ async function route() {
   else if (parts[0] === 'products') products();
   else if (parts[0] === 's') searchPage();
   else if (parts[0] === 'saved') saved(P.get('t'));
+  else if (parts[0] === 'learn') parts[1] ? learnDetail(parts[1]) : learnList();
   else if (parts[0] === 'learn') parts[1] ? learnDetail(parts[1]) : learnList();
   else home();
   markDrawer();

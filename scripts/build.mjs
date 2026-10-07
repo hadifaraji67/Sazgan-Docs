@@ -8,8 +8,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const W = (...p) => path.join(root, 'www', ...p);
 const NM = (...p) => path.join(root, 'node_modules', ...p);
 
-for (const d of ['lib', 'files', 'data', 'fonts']) fs.rmSync(W(d), { recursive: true, force: true });
-for (const d of ['lib', 'files', 'data', 'fonts']) fs.mkdirSync(W(d), { recursive: true });
+for (const d of ['lib', 'files', 'data', 'fonts', 'learn-images']) fs.rmSync(W(d), { recursive: true, force: true });
+for (const d of ['lib', 'files', 'data', 'fonts', 'learn-images']) fs.mkdirSync(W(d), { recursive: true });
 
 for (const f of ['pdf.min.mjs', 'pdf.worker.min.mjs'])
   fs.copyFileSync(NM('pdfjs-dist/legacy/build', f), W('lib', f));
@@ -17,7 +17,17 @@ for (const f of ['Vazirmatn-Regular.woff2', 'Vazirmatn-Medium.woff2', 'Vazirmatn
   fs.copyFileSync(NM('vazirmatn/fonts/webfonts', f), W('fonts', f));
 
 const contentDir = path.join(root, 'content');
-const slugs = fs.readdirSync(contentDir).filter(d => fs.statSync(path.join(contentDir, d)).isDirectory() && d !== 'learn').sort();
+
+// کپی تصاویر مقالات آموزشی
+const imgSrc = path.join(contentDir, 'learn-images');
+if (fs.existsSync(imgSrc)) {
+  for (const f of fs.readdirSync(imgSrc)) {
+    fs.copyFileSync(path.join(imgSrc, f), W('learn-images', f));
+    console.log(`🖼  ${f}`);
+  }
+}
+
+const slugs = fs.readdirSync(contentDir).filter(d => fs.statSync(path.join(contentDir, d)).isDirectory() && d !== 'learn' && d !== 'learn-images').sort();
 
 const catalog = { products: [] };
 const index = [];
