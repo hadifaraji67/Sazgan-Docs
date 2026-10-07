@@ -1,0 +1,19 @@
+{
+  "name": "sazgan-guides",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:content": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs && npx http-server www -p 8080 -c-1"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/filesystem": "^6.0.2",
+    "@capacitor/share": "^6.0.3",
+    "pdfjs-dist": "4.10.38",
+    "vazirmatn": "^33.0.3"
+  }
+}
