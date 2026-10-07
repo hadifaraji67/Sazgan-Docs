@@ -2,25 +2,72 @@ name: Build APK
 on:
   push:
     branches: [main]
+    paths-ignore: ['README.md']
   workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: build
+  cancel-in-progress: true
 jobs:
   apk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22 }
+        with: { node-version: 22, cache: npm }
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
+
+      - name: Version (from VERSION file + run number)
+        run: |
+          VER=$(tr -d ' \n\r' < VERSION)
+          echo "APP_VERSION=$VER" >> $GITHUB_ENV
+          echo "APP_BUILD=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "APK_NAME=sazgan-guides-v$VER-b${{ github.run_number }}.apk" >> $GITHUB_ENV
+
       - run: npm install --no-audit --no-fund
       - run: node scripts/build.mjs
-      - name: Add Android project (first time only)
+      - name: Add Android project
         run: test -d android || npx cap add android
+      - name: Apply version to Android
+        run: |
+          sed -i "s/versionCode [0-9]*/versionCode $APP_BUILD/; s/versionName \".*\"/versionName \"$APP_VERSION\"/" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
       - run: npx cap sync android
-      - name: Build debug APK
+
+      - name: Build APK (signed release if keystore secrets exist, else debug)
         working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug
+        env:
+          KS: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > "$RUNNER_TEMP/release.jks"
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.jks" \
+              -Pandroid.injected.signing.store.password="$KS_PASS" \
+              -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
+              -Pandroid.injected.signing.key.password="$KEY_PASS"
+            cp app/build/outputs/apk/release/app-release.apk "../$APK_NAME"
+          else
+            ./gradlew assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk "../$APK_NAME"
+          fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: sazgan-guides-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.APK_NAME }}
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.APP_VERSION }}-b${{ github.run_number }}
+          name: راهنمای سازگان ${{ env.APP_VERSION }} (ساخت ${{ github.run_number }})
+          files: ${{ env.APK_NAME }}
+          generate_release_notes: true
+          make_latest: true

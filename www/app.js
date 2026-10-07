@@ -25,9 +25,10 @@ function norm(s) {
 const terms = q => norm(q).n.split(/\s+/).filter(Boolean);
 
 // ---------- داده ----------
-let catalog, index;
+let catalog, index, ver;
 const load = async () => {
   if (catalog) return;
+  ver = await (await fetch('data/version.json')).json();
   catalog = await (await fetch('data/catalog.json')).json();
   index = await (await fetch('data/index.json')).json();
   index.forEach(e => (e.m = norm(e.t)));
@@ -81,7 +82,7 @@ async function shareFile(id) {
 const fa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 function home() {
   app.innerHTML = `<div class="bar"><h1>راهنمای محصولات سازگان گستر</h1><button id="dk">شب</button></div>
-  <div class="wrap"><div class="search"><input id="q" type="search" placeholder="جستجو در متن همه راهنماها" autocomplete="off"></div><div id="list"></div></div>`;
+  <div class="wrap"><div class="search"><input id="q" type="search" placeholder="جستجو در متن همه راهنماها" autocomplete="off"></div><div id="list"></div><div class="ver">نسخه ${fa(ver.version)} (ساخت ${fa(ver.build)}) · ${new Date(ver.date).toLocaleDateString('fa-IR-u-ca-persian')}</div></div>`;
   $('#dk').onclick = toggleDark;
   const list = $('#list');
   const drawProducts = () => {

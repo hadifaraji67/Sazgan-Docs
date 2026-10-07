@@ -40,3 +40,4 @@ body.dark .page canvas{filter:invert(1) hue-rotate(180deg)}
 #toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#000c;color:#fff;padding:8px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90vw}
 #toast.on{opacity:1}
 .grp{margin:18px 0 0;color:var(--accent);font-weight:700;font-size:14px;border-bottom:2px solid var(--accent);padding-bottom:2px}
+.ver{margin-top:36px;text-align:center;color:var(--mute);font-size:12px}

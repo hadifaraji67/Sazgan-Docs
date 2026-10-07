@@ -48,6 +48,14 @@ for (const slug of slugs) {
   catalog.products.push(product);
 }
 
+const version = {
+  version: (process.env.APP_VERSION || fs.readFileSync(path.join(root, 'VERSION'), 'utf8')).trim(),
+  build: process.env.APP_BUILD || 'dev',
+  date: new Date().toISOString(),
+  products: catalog.products.length,
+  files: catalog.products.reduce((a, p) => a + p.files.length, 0)
+};
+fs.writeFileSync(W('data', 'version.json'), JSON.stringify(version));
 fs.writeFileSync(W('data', 'catalog.json'), JSON.stringify(catalog));
 fs.writeFileSync(W('data', 'index.json'), JSON.stringify(index));
 console.log(`محصول: ${catalog.products.length} | صفحه‌های ایندکس‌شده: ${index.length}`);

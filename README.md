@@ -16,3 +16,9 @@
 
 ## تست روی کامپیوتر
 `npm install && npm run dev` و باز کردن http://localhost:8080
+
+## نسخه‌بندی
+- شماره نسخه در فایل `VERSION` است (مثلاً `0.3.0`). برای نسخه جدید این فایل را عوض کنید.
+- شماره ساخت (build) را گیت‌هاب خودکار می‌دهد و همان `versionCode` اندروید است.
+- هر push روی main خودکار APK می‌سازد و در بخش **Releases** ریپو منتشر می‌کند.
+- امضای رسمی: اگر در Settings ← Secrets ← Actions این چهار مقدار را بگذارید، APK امضاشده (release) ساخته می‌شود: `KEYSTORE_BASE64`، `KEYSTORE_PASSWORD`، `KEY_ALIAS`، `KEY_PASSWORD`.
