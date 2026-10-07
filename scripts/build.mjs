@@ -1,5 +1,4 @@
-// ساخت محتوای اپ: کپی PDFها، استخراج متن برای جستجو و ساخت catalog.json
-// ورودی: پوشه content/<slug>/ شامل product.json و فایل‌های PDF
+// ساخت محتوای اپ: کپی PDFها، استخراج متن، ساخت catalog.json و learn.json
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,14 +11,13 @@ const NM = (...p) => path.join(root, 'node_modules', ...p);
 for (const d of ['lib', 'files', 'data', 'fonts']) fs.rmSync(W(d), { recursive: true, force: true });
 for (const d of ['lib', 'files', 'data', 'fonts']) fs.mkdirSync(W(d), { recursive: true });
 
-// کتابخانه PDF و فونت وزیرمتن (آفلاین)
 for (const f of ['pdf.min.mjs', 'pdf.worker.min.mjs'])
   fs.copyFileSync(NM('pdfjs-dist/legacy/build', f), W('lib', f));
 for (const f of ['Vazirmatn-Regular.woff2', 'Vazirmatn-Medium.woff2', 'Vazirmatn-Bold.woff2'])
   fs.copyFileSync(NM('vazirmatn/fonts/webfonts', f), W('fonts', f));
 
 const contentDir = path.join(root, 'content');
-const slugs = fs.readdirSync(contentDir).filter(d => fs.statSync(path.join(contentDir, d)).isDirectory()).sort();
+const slugs = fs.readdirSync(contentDir).filter(d => fs.statSync(path.join(contentDir, d)).isDirectory() && d !== 'learn').sort();
 
 const catalog = { products: [] };
 const index = [];
@@ -48,15 +46,32 @@ for (const slug of slugs) {
   catalog.products.push(product);
 }
 
+// ---- پردازش مقالات آموزشی ----
+const learnDir = path.join(contentDir, 'learn');
+const learn = { articles: [] };
+if (fs.existsSync(learnDir)) {
+  const files = fs.readdirSync(learnDir).filter(f => f.endsWith('.md')).sort();
+  for (const file of files) {
+    const body = fs.readFileSync(path.join(learnDir, file), 'utf8');
+    const titleMatch = body.match(/^#\s+(.+)$/m);
+    const title = titleMatch ? titleMatch[1].trim() : file.replace(/\.md$/, '');
+    const slug = file.replace(/^\d+-/, '').replace(/\.md$/, '');
+    learn.articles.push({ slug, title, body });
+    console.log(`📖 مقاله: ${title}`);
+  }
+}
+fs.writeFileSync(W('data', 'learn.json'), JSON.stringify(learn));
+
 const version = {
   version: (process.env.APP_VERSION || fs.readFileSync(path.join(root, 'VERSION'), 'utf8')).trim(),
   build: process.env.APP_BUILD || 'dev',
   date: new Date().toISOString(),
   products: catalog.products.length,
-  files: catalog.products.reduce((a, p) => a + p.files.length, 0)
+  files: catalog.products.reduce((a, p) => a + p.files.length, 0),
+  articles: learn.articles.length
 };
 fs.writeFileSync(W('data', 'app.json'), fs.existsSync(path.join(contentDir, 'app.json')) ? fs.readFileSync(path.join(contentDir, 'app.json')) : '{}');
 fs.writeFileSync(W('data', 'version.json'), JSON.stringify(version));
 fs.writeFileSync(W('data', 'catalog.json'), JSON.stringify(catalog));
 fs.writeFileSync(W('data', 'index.json'), JSON.stringify(index));
-console.log(`محصول: ${catalog.products.length} | صفحه‌های ایندکس‌شده: ${index.length}`);
+console.log(`محصول: ${catalog.products.length} | صفحه‌ها: ${index.length} | مقاله: ${learn.articles.length}`);

@@ -46,7 +46,7 @@ function norm(s) {
 const terms = q => norm(q).n.split(/\s+/).filter(Boolean);
 
 // ---------- داده ----------
-let catalog, index, ver, cfg = {};
+let catalog, index, ver, learn, cfg = {};
 const load = async () => {
   if (catalog) return;
   ver = await (await fetch('data/version.json')).json();
@@ -54,6 +54,7 @@ const load = async () => {
   catalog = await (await fetch('data/catalog.json')).json();
   index = await (await fetch('data/index.json')).json();
   index.forEach(e => (e.m = norm(e.t)));
+  learn = await (await fetch('data/learn.json')).json().catch(() => ({articles:[]}));
   $('#dv').textContent = `نسخه ${fa(ver.version)} (ساخت ${fa(ver.build)})`;
 };
 const fileById = id => { for (const p of catalog.products) for (const f of p.files) if (f.id === id) return { p, f }; };
@@ -119,7 +120,7 @@ function initDrawer() {
   const it = (i, l, go, id, sw) => `<button class="it" ${go ? `data-go="${go}"` : ''} ${id ? `id="${id}"` : ''}>${ic(i)}<span>${l}</span>${sw ? '<em class="sw"></em>' : ''}</button>`;
   const d = document.createElement('div'); d.className = 'ov'; d.id = 'ov';
   d.innerHTML = `<div class="dr" role="dialog" aria-label="منو"><div class="dh"><b>راهنمای سازگان</b><small>مهندسی سازگان گستر</small></div>
-  ${it('home', 'خانه', '#/')}${it('grid', 'همه محصولات', '#/products')}${it('save', 'فایل‌های ذخیره‌شده', '#/saved')}${it('book', 'نشانک‌ها', '#/saved?t=bm')}<hr>
+  ${it('home', 'خانه', '#/')}${it('grid', 'همه محصولات', '#/products')}${it('save', 'فایل‌های ذخیره‌شده', '#/saved')}${it('book', 'نشانک‌ها', "#/saved?t=bm")}${it('help', 'آموزش بالینی', '#/learn')}<hr>
   ${it('moon', 'حالت شب', '', 'd_dk', 1)}${it('txt', 'اندازه متن', '', 'd_fs')}${it('dev', 'ظاهر مینیمال', '', 'd_min', 1)}${it('help', 'تماس با پشتیبانی', '', 'd_sp')}${it('info', 'درباره اپ', '', 'd_ab')}<div class="dv" id="dv"></div></div>`;
   document.body.appendChild(d);
   d.onclick = e => { if (e.target === d) closeDrawer(); const g = e.target.closest('[data-go]'); if (g) { closeDrawer(); location.hash = g.dataset.go; } };
@@ -271,6 +272,40 @@ async function reader(id, params) {
   curPage = start; pn.value = start; syncBm(); requestAnimationFrame(() => go(start));
 }
 
+// ---------- بخش آموزش ----------
+function mdRender(text) {
+  const inl = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
+  const lines = text.split('\n');
+  let html = '', inList = false, inTable = false;
+  for (const line of lines) {
+    if (/^### /.test(line)) { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<h3>${inl(line.slice(4))}</h3>`; }
+    else if (/^## /.test(line)) { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<h2>${inl(line.slice(3))}</h2>`; }
+    else if (/^# /.test(line)) { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<h1>${inl(line.slice(2))}</h1>`; }
+    else if (/^- /.test(line)) { if (inTable) { html += '</table>'; inTable = false; } if (!inList) { html += '<ul>'; inList = true; } html += `<li>${inl(line.slice(2))}</li>`; }
+    else if (/^\|/.test(line)) {
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      if (/^[\s|:-]+$/.test(line)) continue;
+      if (inList) { html += '</ul>'; inList = false; }
+      if (!inTable) { html += '<table>'; inTable = true; html += '<thead><tr>' + cells.map(c => `<th>${inl(c)}</th>`).join('') + '</tr></thead><tbody>'; continue; }
+      html += '<tr>' + cells.map(c => `<td>${inl(c)}</td>`).join('') + '</tr>';
+    }
+    else if (line.trim() === '') { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } }
+    else { if (inList) { html += '</ul>'; inList = false; } if (inTable) { html += '</table>'; inTable = false; } html += `<p>${inl(line)}</p>`; }
+  }
+  if (inList) html += '</ul>';
+  if (inTable) html += '</table>';
+  return html;
+}
+function learnList() {
+  const arts = learn.articles || [];
+  screen(`${bar('آموزش بالینی')}<div class="wrap">${arts.length ? arts.map(a => `<button class="row" data-l="${esc(a.slug)}"><div class="tile">${ic('help')}</div><div><b>${esc(a.title)}</b><span>مطالعه مقاله</span></div></button>`).join('') : '<div class="empty">هنوز مقاله‌ای اضافه نشده است.</div>'}</div>`, '#/learn');
+  app.querySelectorAll('[data-l]').forEach(b => (b.onclick = () => (location.hash = '#/learn/' + encodeURIComponent(b.dataset.l))));
+}
+function learnDetail(slug) {
+  const a = (learn.articles || []).find(x => x.slug === slug);
+  if (!a) return (location.hash = '#/learn');
+  screen(`${bar(a.title, true)}<div class="wrap"><article class="article">${mdRender(a.body)}</article></div>`, '#/learn');
+}
 // ---------- مسیریابی ----------
 async function route() {
   window.onscroll = null; window.scrollTo(0, 0); closeDrawer();
@@ -282,6 +317,7 @@ async function route() {
   else if (parts[0] === 'products') products();
   else if (parts[0] === 's') searchPage();
   else if (parts[0] === 'saved') saved(P.get('t'));
+  else if (parts[0] === 'learn') parts[1] ? learnDetail(parts[1]) : learnList();
   else home();
   markDrawer();
 }

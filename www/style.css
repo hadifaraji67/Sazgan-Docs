@@ -412,3 +412,24 @@ body.dark .page canvas{filter:invert(1) hue-rotate(180deg)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none!important;animation:none!important}
 }
+/* ==================== Article / Learn ==================== */
+.article{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px 18px;box-shadow:var(--shadow);line-height:1.95;font-size:15px}
+.article h1{font-size:1.45em;margin:0 0 18px;padding-bottom:12px;border-bottom:2px solid var(--accent);color:var(--accent);line-height:1.4}
+.article h2{font-size:1.2em;margin:28px 0 12px;padding-right:12px;border-right:3px solid var(--accent);color:var(--ink);line-height:1.5}
+.article h3{font-size:1.05em;margin:20px 0 8px;color:var(--accent);font-weight:700}
+.article p{margin:12px 0;color:var(--ink)}
+.article ul{margin:12px 0;padding-right:22px;list-style:none}
+.article ul li{position:relative;margin:8px 0;padding-right:16px;color:var(--ink)}
+.article ul li::before{content:"";position:absolute;right:0;top:.7em;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.article strong{color:var(--accent);font-weight:700}
+.article em{color:var(--mute);font-style:normal;font-weight:500}
+.article table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;background:var(--bg);border-radius:10px;overflow:hidden}
+.article th{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;padding:10px 12px;text-align:right;font-weight:600}
+.article td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right}
+.article tr:last-child td{border-bottom:0}
+.article tr:nth-child(even) td{background:color-mix(in srgb,var(--tint) 40%,transparent)}
+.article pre{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;direction:ltr;text-align:left;font-size:13px;line-height:1.6}
+.article code{font-family:ui-monospace,Menlo,Consolas,monospace;direction:ltr;display:inline-block}
+.article pre code{display:block}
+.article blockquote{margin:14px 0;padding:10px 16px;background:var(--tint);border-right:4px solid var(--accent);border-radius:8px;color:var(--mute);font-size:14px}
+.article hr{border:0;height:1px;background:var(--line);margin:24px 0}
