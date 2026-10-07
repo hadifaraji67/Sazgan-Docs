@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 480" font-family="Vazirmatn,system-ui,sans-serif">
+  <rect width="700" height="480" fill="#fff"/>
+  <defs><radialGradient id="nd" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#3FC1D4"/><stop offset="1" stop-color="#0E7C8F"/></radialGradient>
+  <linearGradient id="ht" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F7F9"/><stop offset="1" stop-color="#E0F0F4"/></linearGradient></defs>
+  <path d="M 350 60 C 220 60 130 140 130 240 C 130 320 200 400 290 430 C 320 440 340 445 350 450 C 360 445 380 440 410 430 C 500 400 570 320 570 240 C 570 140 480 60 350 60 Z" fill="url(#ht)" stroke="#D3DEE1" stroke-width="2"/>
+  <text x="220" y="140" font-size="13" fill="#5E7480" font-weight="600">دهلیز راست</text>
+  <text x="480" y="140" font-size="13" fill="#5E7480" font-weight="600" text-anchor="end">دهلیز چپ</text>
+  <text x="220" y="380" font-size="13" fill="#5E7480" font-weight="600">بطن راست</text>
+  <text x="480" y="380" font-size="13" fill="#5E7480" font-weight="600" text-anchor="end">بطن چپ</text>
+  <line x1="350" y1="140" x2="350" y2="430" stroke="#D3DEE1" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <circle cx="240" cy="105" r="16" fill="url(#nd)"/><text x="240" y="110" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">SA</text>
+  <text x="240" y="80" font-size="12" fill="#0E7C8F" text-anchor="middle" font-weight="700">گره سینوسی-دهلیزی</text>
+  <circle cx="325" cy="235" r="14" fill="url(#nd)"/><text x="325" y="240" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">AV</text>
+  <text x="290" y="215" font-size="12" fill="#0E7C8F" text-anchor="end" font-weight="700">گره دهلیزی-بطنی</text>
+  <line x1="325" y1="249" x2="340" y2="290" stroke="#0E7C8F" stroke-width="5" stroke-linecap="round"/>
+  <text x="380" y="290" font-size="12" fill="#0E7C8F" font-weight="700">دسته هیس</text>
+  <line x1="340" y1="290" x2="290" y2="355" stroke="#0E7C8F" stroke-width="4" stroke-linecap="round"/>
+  <line x1="340" y1="290" x2="400" y2="355" stroke="#0E7C8F" stroke-width="4" stroke-linecap="round"/>
+  <text x="230" y="360" font-size="11" fill="#0E7C8F" text-anchor="end">شاخه راست</text>
+  <text x="440" y="360" font-size="11" fill="#0E7C8F" text-anchor="start">شاخه چپ</text>
+  <g stroke="#3FC1D4" stroke-width="2" stroke-linecap="round" fill="none">
+    <path d="M 290 355 Q 250 400 210 420"/><path d="M 290 355 Q 270 410 260 430"/>
+    <path d="M 400 355 Q 440 400 480 420"/><path d="M 400 355 Q 420 410 430 430"/>
+  </g>
+  <text x="350" y="470" font-size="12" fill="#0E7C8F" text-anchor="middle" font-weight="700">الیاف پورکنژ</text>
+  <g stroke="#F2B705" stroke-width="2.5" fill="none" stroke-dasharray="5,3">
+    <path d="M 240 121 Q 240 170 300 220"/><path d="M 325 249 Q 325 265 335 280"/>
+  </g>
+</svg>
