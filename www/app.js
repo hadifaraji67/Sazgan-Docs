@@ -299,10 +299,10 @@ function mdRender(text) {
     else if (/^# /.test(line)) { closeBlocks(); html += `<h1>${inl(line.slice(2))}</h1>`; }
     else if (/^> /.test(line)) { closeBlocks(); html += `<blockquote>${inl(line.slice(2))}</blockquote>`; }
     else if (/^---+\s*$/.test(line)) { closeBlocks(); html += '<hr>'; }
-    else if (/^- /.test(line)) {
+    else if (/^\s*- /.test(line)) {
       if (inTable) { html += '</table>'; inTable = false; }
       if (!inList) { html += '<ul>'; inList = true; }
-      html += `<li>${inl(line.slice(2))}</li>`;
+      html += `<li${/^\s+/.test(line) ? ' class="sub"' : ''}>${inl(line.replace(/^\s*- /, ''))}</li>`;
     }
     else if (/^\|/.test(line)) {
       const cells = line.split('|').slice(1, -1).map(c => c.trim());
@@ -339,7 +339,6 @@ async function route() {
   else if (parts[0] === 'products') products();
   else if (parts[0] === 's') searchPage();
   else if (parts[0] === 'saved') saved(P.get('t'));
-  else if (parts[0] === 'learn') parts[1] ? learnDetail(parts[1]) : learnList();
   else if (parts[0] === 'learn') parts[1] ? learnDetail(parts[1]) : learnList();
   else home();
   markDrawer();
