@@ -2,5 +2,8 @@
   "title": "مانیتور علائم حیاتی وکترا",
   "group": "مانیتور علائم حیاتی",
   "summary": "",
-  "titles": {}
+  "titles": {
+    "vectra-quick-card.pdf": "کارت راهنمای سریع",
+    "vectra-user-manual-A9.pdf": "راهنمای جامع کاربر (نسخه A9)"
+  }
 }

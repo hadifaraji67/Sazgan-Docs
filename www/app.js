@@ -30,7 +30,7 @@ const IC = {
 const ic = (n, s = 24) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
 
 // ---------- نرمال‌سازی متن فارسی برای جستجو ----------
-const MAP = { 'ي': 'ی', 'ى': 'ی', 'ك': 'ک', 'ة': 'ه', 'ۀ': 'ه', 'أ': 'ا', 'إ': 'ا', 'آ': 'ا' };
+const MAP = { 'ي': 'ی', 'ى': 'ی', 'ك': 'ک', 'ة': 'ه', 'ۀ': 'ه', 'ھ': 'ه', 'ە': 'ه', 'أ': 'ا', 'إ': 'ا', 'آ': 'ا' };
 function norm(s) {
   let n = '', idx = [];
   s = s.normalize('NFKC');
@@ -41,7 +41,8 @@ function norm(s) {
     else if (c >= '٠' && c <= '٩') c = String(c.charCodeAt(0) - 1632);
     for (const ch of c.toLowerCase()) { n += ch; idx.push(i); }
   }
-  return { n, idx };
+  // لا و ال را یکسان می‌گیریم: برخی PDFهای ورد «لا» را به‌صورت «ال» استخراج می‌کنند
+  return { n: n.replace(/لا/g, 'ال'), idx };
 }
 const terms = q => norm(q).n.split(/\s+/).filter(Boolean);
 
